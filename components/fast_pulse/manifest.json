@@ -2,7 +2,6 @@
   "name": "Fast Pulse Output",
   "version": "1.0.0",
   "codeowners": ["@isiirk32"],
-  "requirements": [],
   "esphome": {
     "version": ">=2025.7.0"
   }
