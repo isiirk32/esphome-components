@@ -1,27 +1,28 @@
-from esphome import pins
-from esphome.components.output import Output
-import esphome.config_validation as cv
 import esphome.codegen as cg
+import esphome.config_validation as cv
+from esphome import pins
+from esphome.const import CONF_ID, CONF_PIN
 
-# Импортируем реализацию
-from .output import FastPulseOutput
+DEPENDENCIES = []
+CODEOWNERS = ["@isiirk32"]
 
-# Конфигурационная схема
-CONFIG_SCHEMA = Output.BASE_OUTPUT_SCHEMA.extend({
-    cv.Required("pin"): pins.gpio_output_pin_schema,
-    cv.Optional("pulse_width", default="10us"): cv.positive_time_period_microseconds,
-    cv.Optional("pulse_gap", default="40us"): cv.positive_time_period_microseconds,
-    cv.Optional("max_pulses", default=10000): cv.positive_int,
-})
+fast_pulse_ns = cg.esphome_ns.namespace('fast_pulse')
+FastPulseOutput = fast_pulse_ns.class_('FastPulseOutput', cg.Component, cg.Output)
 
-# Функция для создания компонента
+CONFIG_SCHEMA = cv.Schema({
+    cv.Required(CONF_PIN): pins.gpio_output_pin_schema,
+    cv.Optional('pulse_width', default='10us'): cv.positive_time_period_microseconds,
+    cv.Optional('pulse_gap', default='40us'): cv.positive_time_period_microseconds,
+    cv.Optional('max_pulses', default=10000): cv.positive_int,
+}).extend(cv.COMPONENT_SCHEMA)
+
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await Output.register_output(var, config)
+    await cg.register_component(var, config)
     
-    pin = await cg.gpio_pin_expression(config["pin"])
+    pin = await cg.gpio_pin_expression(config[CONF_PIN])
     cg.add(var.set_pin(pin))
     
-    cg.add(var.set_pulse_width(config["pulse_width"]))
-    cg.add(var.set_pulse_gap(config["pulse_gap"]))
-    cg.add(var.set_max_pulses(config["max_pulses"]))
+    cg.add(var.set_pulse_width(config['pulse_width']))
+    cg.add(var.set_pulse_gap(config['pulse_gap']))
+    cg.add(var.set_max_pulses(config['max_pulses']))
